@@ -10,10 +10,13 @@ namespace mockup { namespace crypto { namespace cipher {
 
     using namespace mockup::crypto;
     
-    template <typename WORD_T, size_t WORDSIZE, size_t NUMWORDS>
+    template <typename WORD_T>
     class Speck : public BlockCipher {
     private:
+        size_t wordSize;
+        size_t numWords;
         size_t numRounds;
+
         size_t alpha;
         size_t beta;
     
@@ -21,9 +24,7 @@ namespace mockup { namespace crypto { namespace cipher {
         WORD_T* rks;
 
     public:
-        Speck() {
-            setNumRounds();
-            rks = new WORD_T[numRounds];
+        Speck() : rks(nullptr), wordSize(sizeof(WORD_T) << 3) {
         }
         
         ~Speck() {
@@ -33,30 +34,32 @@ namespace mockup { namespace crypto { namespace cipher {
         const std::string name() const
         {
             std::stringstream ss;
-            ss << "Speck" << (WORDSIZE * 2) << "-" << (WORDSIZE * NUMWORDS);
+            ss << "Speck" << (blocksize() << 3) << "-" << (keysize() << 3);
             return ss.str();
         }
 
         size_t keysize() const {
-            return (WORDSIZE * NUMWORDS) >> 3;
+            return (wordSize * numWords) >> 3;
         }
 
         size_t blocksize() const {
-            return (WORDSIZE * 2) >> 3;
+            return (wordSize * 2) >> 3;
         }
 
-        void init(const uint8_t* mk) {
+        void init(const uint8_t* mk, size_t keylen) {
+            setParams(keylen);
+
             WORD_T* ptr = (WORD_T*)(mk);
-            WORD_T* L = new WORD_T[numRounds - 2 + NUMWORDS];
+            WORD_T* L = new WORD_T[numRounds - 2 + numWords];
 
             rks[0] = ptr[0];
-            for (size_t i = 0; i < NUMWORDS; ++i) {
+            for (size_t i = 0; i < numWords; ++i) {
                 L[i] = ptr[i + 1];
             }
 
             for (size_t i = 0; i < numRounds - 1; ++i) {
-                L[i + NUMWORDS - 1] = (rks[i] + rotr(L[i], alpha)) ^ static_cast<WORD_T>(i);
-                rks[i + 1] = rotl(rks[i], beta) ^ L[i + NUMWORDS - 1];
+                L[i + numWords - 1] = (rks[i] + rotr(L[i], alpha)) ^ static_cast<WORD_T>(i);
+                rks[i + 1] = rotl(rks[i], beta) ^ L[i + numWords - 1];
             }
 
             delete[] L;
@@ -98,48 +101,49 @@ namespace mockup { namespace crypto { namespace cipher {
         }
 
     private:
-        void setNumRounds() {
-            switch(WORDSIZE) {
+        void setParams(size_t keylen) {
+            numWords = keylen / sizeof(WORD_T);
+
+            switch(wordSize) {
             case 16:
                 numRounds = 22;
                 break;
             case 24:
-                numRounds = 19 + NUMWORDS;
+                numRounds = 19 + numWords;
                 break;
             case 32:
-                numRounds = 23 + NUMWORDS;
+                numRounds = 23 + numWords;
                 break;
             case 48:
-                numRounds = 26 + NUMWORDS;
+                numRounds = 26 + numWords;
                 break;
             case 64:
-                numRounds = 30 + NUMWORDS;
+                numRounds = 30 + numWords;
                 break;
             }
 
             alpha = 7;
             beta = 2;
 
-            if (WORDSIZE != 16) {
+            if (wordSize != 16) {
                 alpha = 8;
                 beta = 3;
             }
+
+            rks = new WORD_T[numRounds];
         }
 
         WORD_T rotl(WORD_T value, size_t rot) {
-            return (value << rot) | (value >> (WORDSIZE - rot));
+            return (value << rot) | (value >> (wordSize - rot));
         }
 
         WORD_T rotr(WORD_T value, size_t rot) {
-            return (value >> rot) | (value << (WORDSIZE - rot));
+            return (value >> rot) | (value << (wordSize - rot));
         }
     };
 
-    using Speck32_64 = Speck<uint16_t, 16, 4>;
-    using Speck64_96 = Speck<uint32_t, 32, 3>;
-    using Speck64_128 = Speck<uint32_t, 32, 4>;
-    using Speck128_128 = Speck<uint64_t, 64, 2>;
-    using Speck128_192 = Speck<uint64_t, 64, 3>;
-    using Speck128_256 = Speck<uint64_t, 64, 4>;
+    using Speck32 = Speck<uint16_t>;
+    using Speck64 = Speck<uint32_t>;
+    using Speck128 = Speck<uint64_t>;
 
 }}}

@@ -61,18 +61,17 @@ void print_array(const char* title, const uint8_t* data, size_t count) {
     printf("\n");
 }
 
-void test_cipher(BlockCipher* cipher, const st_testvector tv)
+void test_cipher(BlockCipher* cipher, size_t keylen, const st_testvector tv)
 {
     const size_t blocksize = cipher->blocksize();
     uint8_t enc[blocksize] = {0};
     uint8_t dec[blocksize] = {0};
     
-    std::cout << cipher->name() << std::endl;
-
-    cipher->init(tv.mk);
+    cipher->init(tv.mk, keylen);
     cipher->encryptBlock(enc, tv.pt);
     cipher->decryptBlock(dec, tv.ct);
 
+    std::cout << cipher->name() << std::endl;
     if (memcmp(tv.ct, enc, blocksize) != 0) {
         print_array("    ct:", tv.ct, blocksize);
         print_array("   enc:", enc, blocksize);
@@ -90,33 +89,33 @@ void test_cipher(BlockCipher* cipher, const st_testvector tv)
 }
 
 void test_32_64() {
-    Speck32_64 speck;
-    test_cipher(&speck, TV32_64);
+    Speck32 speck;
+    test_cipher(&speck, BIT_64, TV32_64);
 }
 
 void test_64_96() {
-    Speck64_96 speck;
-    test_cipher(&speck, TV64_96);
+    Speck64 speck;
+    test_cipher(&speck, BIT_96, TV64_96);
 }
 
 void test_64_128() {
-    Speck64_128 speck;
-    test_cipher(&speck, TV64_128);
+    Speck64 speck;
+    test_cipher(&speck, BIT_128, TV64_128);
 }
 
 void test_128_128() {
-    Speck128_128 speck;
-    test_cipher(&speck, TV128_128);
+    Speck128 speck;
+    test_cipher(&speck, BIT_128, TV128_128);
 }
 
 void test_128_192() {
-    Speck128_192 speck;
-    test_cipher(&speck, TV128_192);
+    Speck128 speck;
+    test_cipher(&speck, BIT_192, TV128_192);
 }
 
 void test_128_256() {
-    Speck128_256 speck;
-    test_cipher(&speck, TV128_256);
+    Speck128 speck;
+    test_cipher(&speck, BIT_256, TV128_256);
 }
 
 int main()
