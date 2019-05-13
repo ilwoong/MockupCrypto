@@ -32,7 +32,7 @@
 #include <array>
 #include <sstream>
 
-#include "../BlockCipher.h"
+#include "../block_cipher.h"
 #include "../arx_primitive.hpp"
 
 namespace mockup { namespace crypto { namespace cipher {
@@ -52,7 +52,7 @@ namespace mockup { namespace crypto { namespace cipher {
         WORD_T* _rks;
 
     public:
-        Speck() : _rks(nullptr) {
+        Speck() : _rks(nullptr), _alpha(8), _beta(3) {
         }
         
         ~Speck() {
@@ -150,12 +150,9 @@ namespace mockup { namespace crypto { namespace cipher {
                 break;
             }
 
-            _alpha = 7;
-            _beta = 2;
-
-            if (this->_wordsize != 16) {
-                _alpha = 8;
-                _beta = 3;
+            if (this->_wordsize == 16) {
+                _alpha = 7;
+                _beta = 2;
             }
 
             _rks = new WORD_T[_num_rounds];

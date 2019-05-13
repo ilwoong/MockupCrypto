@@ -28,7 +28,7 @@
 #ifndef __MOCKUP_CRYPTO_BLOCKCIPHER_H__
 #define __MOCKUP_CRYPTO_BLOCKCIPHER_H__
 
-#include "NamedAlgorithm.h"
+#include "named_algorithm.h"
 
 namespace mockup { namespace crypto {
 

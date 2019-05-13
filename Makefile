@@ -5,7 +5,7 @@ CPPFLAGS =
 
 all: test_speck
 
-test_speck : test/blockcipher/test_speck.cpp
+test_speck : test/block_cipher/test_speck.cpp
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 clean:

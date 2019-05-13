@@ -25,7 +25,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../include/blockcipher/speck.hpp"
+#include "../../include/block_cipher/speck.hpp"
 #include <iostream>
 #include <cstdio>
 #include <cstring>

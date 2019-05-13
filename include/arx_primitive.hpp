@@ -40,11 +40,11 @@ namespace mockup { namespace crypto {
             virtual ~ArxPrimitive() {}
 
         protected:
-            inline WORD_T rotl(WORD_T value, size_t rot) {
+            inline WORD_T rotl(WORD_T value, size_t rot) const {
                 return (value << rot) | (value >> (_wordsize - rot));
             }
 
-            inline WORD_T rotr(WORD_T value, size_t rot) {
+            inline WORD_T rotr(WORD_T value, size_t rot) const {
                 return (value >> rot) | (value << (_wordsize - rot));
             }
     };
