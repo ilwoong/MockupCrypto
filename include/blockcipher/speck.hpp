@@ -25,37 +25,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
-
-#include "../BlockCipher.h"
+#ifndef __MOCKUP_CRYPTO_BLOCKCIPHER_SPECK_HPP__
+#define __MOCKUP_CRYPTO_BLOCKCIPHER_SPECK_HPP__
 
 #include <cstdint>
 #include <array>
 #include <sstream>
+
+#include "../BlockCipher.h"
+#include "../arx_primitive.hpp"
 
 namespace mockup { namespace crypto { namespace cipher {
 
     using namespace mockup::crypto;
     
     template <typename WORD_T>
-    class Speck : public BlockCipher {
+    class Speck : public BlockCipher, public ArxPrimitive<WORD_T> {
     private:
-        size_t wordSize;
-        size_t numWords;
-        size_t numRounds;
+        size_t _num_words;
+        size_t _num_rounds;
 
-        size_t alpha;
-        size_t beta;
+        size_t _alpha;
+        size_t _beta;
     
     public: 
-        WORD_T* rks;
+        WORD_T* _rks;
 
     public:
-        Speck() : rks(nullptr), wordSize(sizeof(WORD_T) << 3) {
+        Speck() : _rks(nullptr) {
         }
         
         ~Speck() {
-            delete[] rks;
+            delete[] _rks;
         }
 
         const std::string name() const
@@ -66,27 +67,27 @@ namespace mockup { namespace crypto { namespace cipher {
         }
 
         size_t keysize() const {
-            return (wordSize * numWords) >> 3;
+            return (this->_wordsize * _num_words) >> 3;
         }
 
         size_t blocksize() const {
-            return (wordSize * 2) >> 3;
+            return (this->_wordsize * 2) >> 3;
         }
 
         void init(const uint8_t* mk, size_t keylen) {
             setParams(keylen);
 
             WORD_T* ptr = (WORD_T*)(mk);
-            WORD_T* L = new WORD_T[numRounds - 2 + numWords];
+            WORD_T* L = new WORD_T[_num_rounds - 2 + _num_words];
 
-            rks[0] = ptr[0];
-            for (size_t i = 0; i < numWords; ++i) {
+            _rks[0] = ptr[0];
+            for (size_t i = 0; i < _num_words; ++i) {
                 L[i] = ptr[i + 1];
             }
 
-            for (size_t i = 0; i < numRounds - 1; ++i) {
-                L[i + numWords - 1] = (rks[i] + rotr(L[i], alpha)) ^ static_cast<WORD_T>(i);
-                rks[i + 1] = rotl(rks[i], beta) ^ L[i + numWords - 1];
+            for (size_t i = 0; i < _num_rounds - 1; ++i) {
+                L[i + _num_words - 1] = (_rks[i] + this->rotr(L[i], _alpha)) ^ static_cast<WORD_T>(i);
+                _rks[i + 1] = this->rotl(_rks[i], _beta) ^ L[i + _num_words - 1];
             }
 
             delete[] L;
@@ -100,9 +101,9 @@ namespace mockup { namespace crypto { namespace cipher {
             WORD_T y = pt[0];
             WORD_T x = pt[1];
 
-            for (size_t i = 0; i < numRounds; ++i) {
-                x = (rotr(x, alpha) + y) ^ rks[i];
-                y = rotl(y, beta) ^ x;
+            for (size_t i = 0; i < _num_rounds; ++i) {
+                x = (this->rotr(x, _alpha) + y) ^ _rks[i];
+                y = this->rotl(y, _beta) ^ x;
             }
 
             ct[0] = y;
@@ -117,10 +118,10 @@ namespace mockup { namespace crypto { namespace cipher {
             WORD_T y = ct[0];
             WORD_T x = ct[1];
 
-            size_t rkidx = numRounds - 1;
-            for (size_t i = 0; i < numRounds; ++i, --rkidx) {
-                y = rotr(x ^ y, beta);
-                x = rotl((x ^ rks[rkidx]) - y, alpha);
+            size_t rkidx = _num_rounds - 1;
+            for (size_t i = 0; i < _num_rounds; ++i, --rkidx) {
+                y = this->rotr(x ^ y, _beta);
+                x = this->rotl((x ^ _rks[rkidx]) - y, _alpha);
             }
             
             pt[0] = y;
@@ -129,43 +130,35 @@ namespace mockup { namespace crypto { namespace cipher {
 
     private:
         void setParams(size_t keylen) {
-            numWords = keylen / sizeof(WORD_T);
+            _num_words = keylen / sizeof(WORD_T);
 
-            switch(wordSize) {
+            switch(this->_wordsize) {
             case 16:
-                numRounds = 22;
+                _num_rounds = 22;
                 break;
             case 24:
-                numRounds = 19 + numWords;
+                _num_rounds = 19 + _num_words;
                 break;
             case 32:
-                numRounds = 23 + numWords;
+                _num_rounds = 23 + _num_words;
                 break;
             case 48:
-                numRounds = 26 + numWords;
+                _num_rounds = 26 + _num_words;
                 break;
             case 64:
-                numRounds = 30 + numWords;
+                _num_rounds = 30 + _num_words;
                 break;
             }
 
-            alpha = 7;
-            beta = 2;
+            _alpha = 7;
+            _beta = 2;
 
-            if (wordSize != 16) {
-                alpha = 8;
-                beta = 3;
+            if (this->_wordsize != 16) {
+                _alpha = 8;
+                _beta = 3;
             }
 
-            rks = new WORD_T[numRounds];
-        }
-
-        WORD_T rotl(WORD_T value, size_t rot) {
-            return (value << rot) | (value >> (wordSize - rot));
-        }
-
-        WORD_T rotr(WORD_T value, size_t rot) {
-            return (value >> rot) | (value << (wordSize - rot));
+            _rks = new WORD_T[_num_rounds];
         }
     };
 
@@ -174,3 +167,5 @@ namespace mockup { namespace crypto { namespace cipher {
     using Speck128 = Speck<uint64_t>;
 
 }}}
+
+#endif

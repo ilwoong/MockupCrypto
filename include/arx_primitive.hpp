@@ -25,24 +25,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
-#define __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
-
-#include <string>
+#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
+#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
 
 namespace mockup { namespace crypto {
 
-    const size_t BIT_64 = 8;
-    const size_t BIT_96 = 12;
-    const size_t BIT_128 = 16;
-    const size_t BIT_192 = 24;
-    const size_t BIT_256 = 32;
+    template <typename WORD_T>
+    class ArxPrimitive {
+        protected:
+            size_t _wordsize;
 
-    class NamedAlgorithm {
-    public:
-        virtual const std::string name() const = 0;
+        public:
+            ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
+            virtual ~ArxPrimitive() {}
+
+        protected:
+            inline WORD_T rotl(WORD_T value, size_t rot) {
+                return (value << rot) | (value >> (_wordsize - rot));
+            }
+
+            inline WORD_T rotr(WORD_T value, size_t rot) {
+                return (value >> rot) | (value << (_wordsize - rot));
+            }
     };
-    
 }}
 
 #endif
+
