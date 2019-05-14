@@ -31,13 +31,13 @@
 #include <array>
 #include <sstream>
 
-#include "../named_algorithm.h"
+#include "../hash.h"
 #include "../arx_primitive.h"
 
 namespace mockup { namespace crypto { namespace hash {
 
     template <typename WORD_T, size_t NUM_STEPS>
-    class Lsh : public NamedAlgorithm, public ArxPrimitive<WORD_T> 
+    class Lsh : public Hash, public ArxPrimitive<WORD_T> 
     {
     protected:        
 

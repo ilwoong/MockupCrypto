@@ -28,17 +28,19 @@
 #ifndef __MOCKUP_CRYPTO_HASH_H__
 #define __MOCKUP_CRYPTO_HASH_H__
 
-#include "NamedAlgorithm.h"
+#include "named_algorithm.h"
 
 namespace mockup { namespace crypto { 
 
     class Hash : public NamedAlgorithm {
-        public:
-            Hash();
-            virtual ~Hash();
+    public:
+        Hash() {}
+        virtual ~Hash() {}
 
-            const std::string name() const;
-        };
-    }
+        virtual void init() = 0;
+        virtual void update(const uint8_t* data, size_t length) = 0;
+        virtual void do_final(uint8_t* output) = 0;
+    };
+}}
 
-}
+#endif
