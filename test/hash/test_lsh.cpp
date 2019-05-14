@@ -25,27 +25,53 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
-#define __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
+#include <iostream>
 
-#include <string>
+#include "../../include/hash/lsh.h"
+#include "../../include/util/hex.h"
 
-namespace mockup { namespace crypto {
+using namespace mockup::crypto::hash;
+using namespace mockup::crypto::util;
 
-    const size_t BIT_64 = 8;
-    const size_t BIT_96 = 12;
-    const size_t BIT_128 = 16;
-    const size_t BIT_192 = 24;
-    const size_t BIT_224 = 28;
-    const size_t BIT_256 = 32;
-    const size_t BIT_384 = 48;
-    const size_t BIT_512 = 64;
+void test_lsh256()
+{
+    uint8_t digest[32] = {0, };
+    uint8_t data[384] = {0, };
 
-    class NamedAlgorithm {
-    public:
-        virtual const std::string name() const = 0;
-    };
-    
-}}
+    for (size_t i = 0; i < 384; ++i) {
+        data[i] = (uint8_t) (i & 0xff);
+    }
 
-#endif
+    Lsh256 lsh;
+    lsh.init();
+    lsh.update(data, 384);
+    lsh.do_final(digest);
+
+    std::cout << lsh.name() << std::endl;
+    print_hex(digest, 32);
+}
+
+void test_lsh512()
+{
+    uint8_t digest[64] = {0, };
+    uint8_t data[384] = {0, };
+
+    for (size_t i = 0; i < 384; ++i) {
+        data[i] = (uint8_t) (i & 0xff);
+    }
+
+    Lsh512 lsh;
+    lsh.init();
+    lsh.update(data, 384);
+    lsh.do_final(digest);
+
+    std::cout << lsh.name() << std::endl;
+    print_hex(digest, 64);
+}
+
+int main() {
+
+    test_lsh256();
+    test_lsh512();
+    return 0;
+}

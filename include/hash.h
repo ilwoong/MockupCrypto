@@ -25,27 +25,20 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
-#define __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
+#ifndef __MOCKUP_CRYPTO_HASH_H__
+#define __MOCKUP_CRYPTO_HASH_H__
 
-#include <string>
+#include "NamedAlgorithm.h"
 
-namespace mockup { namespace crypto {
+namespace mockup { namespace crypto { 
 
-    const size_t BIT_64 = 8;
-    const size_t BIT_96 = 12;
-    const size_t BIT_128 = 16;
-    const size_t BIT_192 = 24;
-    const size_t BIT_224 = 28;
-    const size_t BIT_256 = 32;
-    const size_t BIT_384 = 48;
-    const size_t BIT_512 = 64;
+    class Hash : public NamedAlgorithm {
+        public:
+            Hash();
+            virtual ~Hash();
 
-    class NamedAlgorithm {
-    public:
-        virtual const std::string name() const = 0;
-    };
-    
-}}
+            const std::string name() const;
+        };
+    }
 
-#endif
+}

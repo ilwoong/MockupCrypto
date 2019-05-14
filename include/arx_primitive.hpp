@@ -32,21 +32,30 @@ namespace mockup { namespace crypto {
 
     template <typename WORD_T>
     class ArxPrimitive {
-        protected:
-            size_t _wordsize;
+    protected:
+        size_t _wordsize;
 
-        public:
-            ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
-            virtual ~ArxPrimitive() {}
+    public:
+        ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
+        virtual ~ArxPrimitive() {}
 
-        protected:
-            inline WORD_T rotl(WORD_T value, size_t rot) const {
-                return (value << rot) | (value >> (_wordsize - rot));
+    protected:
+        inline WORD_T rotl(WORD_T value, size_t rot) const 
+        {
+            return (value << rot) | (value >> (_wordsize - rot));
+        }
+
+        inline WORD_T rotr(WORD_T value, size_t rot) const 
+        {
+            return (value >> rot) | (value << (_wordsize - rot));
+        }
+
+        void xor_array(WORD_T* out, const WORD_T* lhs, const WORD_T* rhs, size_t count) const
+        {
+            for (size_t i = 0; i < count; ++i) {
+                out[i] = lhs[i] xor rhs[i];
             }
-
-            inline WORD_T rotr(WORD_T value, size_t rot) const {
-                return (value >> rot) | (value << (_wordsize - rot));
-            }
+        }
     };
 }}
 

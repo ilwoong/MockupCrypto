@@ -25,12 +25,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../include/block_cipher/speck.hpp"
 #include <iostream>
 #include <cstdio>
 #include <cstring>
 
+#include "../../include/block_cipher/speck.hpp"
+#include "../../include/util/hex.h"
+
 using namespace mockup::crypto::cipher;
+using namespace mockup::crypto::util;
 
 struct st_testvector {
     uint8_t mk[64];
@@ -80,14 +83,6 @@ static const st_testvector TV128_256 {
     {0x43, 0x8f, 0x18, 0x9c, 0x8d, 0xb4, 0xee, 0x4e, 0x3e, 0xf5, 0xc0, 0x05, 0x04, 0x01, 0x09, 0x41},
 };
 
-void print_array(const char* title, const uint8_t* data, size_t count) {
-    printf("%s: ", title);
-    for (int i = 0; i < count; ++i) {
-        printf("0x%02x, ", data[i]);
-    }
-    printf("\n");
-}
-
 void test_cipher(BlockCipher* cipher, size_t keylen, const st_testvector tv)
 {
     const size_t blocksize = cipher->blocksize();
@@ -100,15 +95,15 @@ void test_cipher(BlockCipher* cipher, size_t keylen, const st_testvector tv)
 
     std::cout << cipher->name() << std::endl;
     if (memcmp(tv.ct, enc, blocksize) != 0) {
-        print_array("    ct:", tv.ct, blocksize);
-        print_array("   enc:", enc, blocksize);
+        print_hex("    ct:", tv.ct, blocksize);
+        print_hex("   enc:", enc, blocksize);
     } else {
         std::cout << "   enc pass" << std::endl;
     }
 
     if (memcmp(tv.pt, dec, blocksize) != 0) {
-        print_array("    pt:", tv.pt, blocksize);
-        print_array("   dec:", dec, blocksize);
+        print_hex("    pt:", tv.pt, blocksize);
+        print_hex("   dec:", dec, blocksize);
     } else {
         std::cout << "   dec pass" << std::endl;
     }

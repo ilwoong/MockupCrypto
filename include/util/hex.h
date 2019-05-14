@@ -25,27 +25,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
-#define __MOCKUP_CRYPTO_NAMED_ALGORITHM_H__
+#ifndef __MOCKUP_CRYPTO_UTIL_HEX_H__
+#define __MOCKUP_CRYPTO_UTIL_HEX_H__
 
-#include <string>
+#include <iomanip>
 
-namespace mockup { namespace crypto {
+namespace mockup { namespace crypto { namespace util {
 
-    const size_t BIT_64 = 8;
-    const size_t BIT_96 = 12;
-    const size_t BIT_128 = 16;
-    const size_t BIT_192 = 24;
-    const size_t BIT_224 = 28;
-    const size_t BIT_256 = 32;
-    const size_t BIT_384 = 48;
-    const size_t BIT_512 = 64;
+    template<typename WORD_T>
+    void print_hex(const WORD_T* data, size_t count)
+    {
+        for (size_t i = 0; i < count; ++i) {
+            std::cout << std::hex << std::setw(sizeof(WORD_T) << 1) << std::setfill('0') << +data[i];
 
-    class NamedAlgorithm {
-    public:
-        virtual const std::string name() const = 0;
-    };
-    
-}}
+            if ( (i + 1) % 4 == 0) {
+                std::cout << " ";
+            }
+
+            if ( (i + 1) % 32 == 0) {            
+                std::cout << std::endl;
+            }
+        }
+
+        std::cout << std::endl;
+    }
+
+    template<typename WORD_T>
+    void print_hex(const char* title, const WORD_T* data, size_t count)
+    {
+        std::cout << title << std::endl;
+        print_hex(data, count);
+    }
+
+}}}
 
 #endif
