@@ -32,7 +32,7 @@
 #include <sstream>
 
 #include "../named_algorithm.h"
-#include "../arx_primitive.hpp"
+#include "../arx_primitive.h"
 
 namespace mockup { namespace crypto { namespace hash {
 

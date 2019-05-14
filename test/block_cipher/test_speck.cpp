@@ -29,7 +29,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "../../include/block_cipher/speck.hpp"
+#include "../../include/block_cipher/speck.h"
 #include "../../include/util/hex.h"
 
 using namespace mockup::crypto::cipher;
