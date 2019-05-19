@@ -180,11 +180,11 @@ namespace mockup { namespace crypto { namespace hash {
                 lhs = _state[col    ] ^ _msg[16 * idx + col    ];
                 rhs = _state[col + 8] ^ _msg[16 * idx + col + 8];
 
-                lhs = this->rotl(lhs + rhs, alpha) ^ _step_constant[8 * idx + col];
-                rhs = this->rotl(lhs + rhs, beta);
+                lhs = ArxPrimitive<WORD_T>::rotl(lhs + rhs, alpha) ^ _step_constant[8 * idx + col];
+                rhs = ArxPrimitive<WORD_T>::rotl(lhs + rhs, beta);
                 
                 _tmp_state[col    ] = lhs + rhs;
-                _tmp_state[col + 8] = this->rotl(rhs, _gamma[col]);
+                _tmp_state[col + 8] = ArxPrimitive<WORD_T>::rotl(rhs, _gamma[col]);
             }
 
             permute_word();

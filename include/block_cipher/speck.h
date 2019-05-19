@@ -67,11 +67,11 @@ namespace mockup { namespace crypto { namespace cipher {
         }
 
         size_t keysize() const {
-            return (this->_wordsize * _num_words) >> 3;
+            return (ArxPrimitive<WORD_T>::_wordsize * _num_words) >> 3;
         }
 
         size_t blocksize() const {
-            return (this->_wordsize * 2) >> 3;
+            return (ArxPrimitive<WORD_T>::_wordsize * 2) >> 3;
         }
 
         void init(const uint8_t* mk, size_t keylen) {
@@ -86,8 +86,8 @@ namespace mockup { namespace crypto { namespace cipher {
             }
 
             for (size_t i = 0; i < _num_rounds - 1; ++i) {
-                L[i + _num_words - 1] = (_rks[i] + this->rotr(L[i], _alpha)) ^ static_cast<WORD_T>(i);
-                _rks[i + 1] = this->rotl(_rks[i], _beta) ^ L[i + _num_words - 1];
+                L[i + _num_words - 1] = (_rks[i] + ArxPrimitive<WORD_T>::rotr(L[i], _alpha)) ^ static_cast<WORD_T>(i);
+                _rks[i + 1] = ArxPrimitive<WORD_T>::rotl(_rks[i], _beta) ^ L[i + _num_words - 1];
             }
 
             delete[] L;
@@ -102,8 +102,8 @@ namespace mockup { namespace crypto { namespace cipher {
             WORD_T x = pt[1];
 
             for (size_t i = 0; i < _num_rounds; ++i) {
-                x = (this->rotr(x, _alpha) + y) ^ _rks[i];
-                y = this->rotl(y, _beta) ^ x;
+                x = (ArxPrimitive<WORD_T>::rotr(x, _alpha) + y) ^ _rks[i];
+                y = ArxPrimitive<WORD_T>::rotl(y, _beta) ^ x;
             }
 
             ct[0] = y;
@@ -120,8 +120,8 @@ namespace mockup { namespace crypto { namespace cipher {
 
             size_t rkidx = _num_rounds - 1;
             for (size_t i = 0; i < _num_rounds; ++i, --rkidx) {
-                y = this->rotr(x ^ y, _beta);
-                x = this->rotl((x ^ _rks[rkidx]) - y, _alpha);
+                y = ArxPrimitive<WORD_T>::rotr(x ^ y, _beta);
+                x = ArxPrimitive<WORD_T>::rotl((x ^ _rks[rkidx]) - y, _alpha);
             }
             
             pt[0] = y;
@@ -132,7 +132,7 @@ namespace mockup { namespace crypto { namespace cipher {
         void setParams(size_t keylen) {
             _num_words = keylen / sizeof(WORD_T);
 
-            switch(this->_wordsize) {
+            switch(ArxPrimitive<WORD_T>::_wordsize) {
             case 16:
                 _num_rounds = 22;
                 break;
@@ -150,7 +150,7 @@ namespace mockup { namespace crypto { namespace cipher {
                 break;
             }
 
-            if (this->_wordsize == 16) {
+            if (ArxPrimitive<WORD_T>::_wordsize == 16) {
                 _alpha = 7;
                 _beta = 2;
             }
