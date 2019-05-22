@@ -39,7 +39,9 @@ namespace mockup { namespace crypto { namespace hash {
     template <typename WORD_T, size_t NUM_STEPS>
     class Lsh : public Hash, public ArxPrimitive<WORD_T> 
     {
-    protected:        
+        using Arx = ArxPrimitive<WORD_T>;
+
+    protected:
 
         const size_t _blocksize;
         size_t _blk_offset;
@@ -61,20 +63,22 @@ namespace mockup { namespace crypto { namespace hash {
         Lsh() : _blocksize(sizeof(WORD_T) << 5) {}
         virtual ~Lsh() {}
 
-        const std::string name() const {
+        const std::string name() const override
+        {
             std::stringstream ss;
             ss << "LSH" << (_blocksize << 1) << "-" << (_output_length << 3);
             return ss.str();
         }
 
-        virtual void init() {            
+        virtual void init() override
+        {
             _blk_offset = 0;
             _tmp_state.fill(0);
             _msg.fill(0);
             _block.fill(0);
         }
 
-        void update(const uint8_t* data, size_t length) 
+        void update(const uint8_t* data, size_t length) override
         {
             if (_blk_offset > 0) {
                 size_t gap = _blocksize - _blk_offset;
@@ -106,7 +110,7 @@ namespace mockup { namespace crypto { namespace hash {
             }
         }
 
-        void do_final(uint8_t* output) 
+        void do_final(uint8_t* output) override
         {
             WORD_T* result = (WORD_T*) output;
             
@@ -180,11 +184,11 @@ namespace mockup { namespace crypto { namespace hash {
                 lhs = _state[col    ] ^ _msg[16 * idx + col    ];
                 rhs = _state[col + 8] ^ _msg[16 * idx + col + 8];
 
-                lhs = ArxPrimitive<WORD_T>::rotl(lhs + rhs, alpha) ^ _step_constant[8 * idx + col];
-                rhs = ArxPrimitive<WORD_T>::rotl(lhs + rhs, beta);
+                lhs = Arx::rotl(lhs + rhs, alpha) ^ _step_constant[8 * idx + col];
+                rhs = Arx::rotl(lhs + rhs, beta);
                 
                 _tmp_state[col    ] = lhs + rhs;
-                _tmp_state[col + 8] = ArxPrimitive<WORD_T>::rotl(rhs, _gamma[col]);
+                _tmp_state[col + 8] = Arx::rotl(rhs, _gamma[col]);
             }
 
             permute_word();

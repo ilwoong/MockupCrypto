@@ -40,7 +40,10 @@ namespace mockup { namespace crypto { namespace cipher {
     using namespace mockup::crypto;
     
     template <typename WORD_T>
-    class Speck : public BlockCipher, public ArxPrimitive<WORD_T> {
+    class Speck : public BlockCipher, public ArxPrimitive<WORD_T> 
+    {
+        using Arx = ArxPrimitive<WORD_T>;
+        
     private:
         size_t _num_words;
         size_t _num_rounds;
@@ -59,22 +62,25 @@ namespace mockup { namespace crypto { namespace cipher {
             delete[] _rks;
         }
 
-        const std::string name() const
+        const std::string name() const override
         {
             std::stringstream ss;
             ss << "Speck" << (blocksize() << 3) << "-" << (keysize() << 3);
             return ss.str();
         }
 
-        size_t keysize() const {
-            return (ArxPrimitive<WORD_T>::_wordsize * _num_words) >> 3;
+        size_t keysize() const override 
+        {
+            return (Arx::_wordsize * _num_words) >> 3;
         }
 
-        size_t blocksize() const {
-            return (ArxPrimitive<WORD_T>::_wordsize * 2) >> 3;
+        size_t blocksize() const override 
+        {
+            return (Arx::_wordsize * 2) >> 3;
         }
 
-        void init(const uint8_t* mk, size_t keylen) {
+        void init(const uint8_t* mk, size_t keylen) override
+        {
             setParams(keylen);
 
             WORD_T* ptr = (WORD_T*)(mk);
@@ -86,14 +92,14 @@ namespace mockup { namespace crypto { namespace cipher {
             }
 
             for (size_t i = 0; i < _num_rounds - 1; ++i) {
-                L[i + _num_words - 1] = (_rks[i] + ArxPrimitive<WORD_T>::rotr(L[i], _alpha)) ^ static_cast<WORD_T>(i);
-                _rks[i + 1] = ArxPrimitive<WORD_T>::rotl(_rks[i], _beta) ^ L[i + _num_words - 1];
+                L[i + _num_words - 1] = (_rks[i] + Arx::rotr(L[i], _alpha)) ^ static_cast<WORD_T>(i);
+                _rks[i + 1] = Arx::rotl(_rks[i], _beta) ^ L[i + _num_words - 1];
             }
 
             delete[] L;
         }
 
-        void encryptBlock(uint8_t* out, const uint8_t* in)
+        void encryptBlock(uint8_t* out, const uint8_t* in) override
         {
             WORD_T* pt = (WORD_T*)(in);
             WORD_T* ct = (WORD_T*)(out);
@@ -102,15 +108,15 @@ namespace mockup { namespace crypto { namespace cipher {
             WORD_T x = pt[1];
 
             for (size_t i = 0; i < _num_rounds; ++i) {
-                x = (ArxPrimitive<WORD_T>::rotr(x, _alpha) + y) ^ _rks[i];
-                y = ArxPrimitive<WORD_T>::rotl(y, _beta) ^ x;
+                x = (Arx::rotr(x, _alpha) + y) ^ _rks[i];
+                y = Arx::rotl(y, _beta) ^ x;
             }
 
             ct[0] = y;
             ct[1] = x;
         }
 
-        void decryptBlock(uint8_t* out, const uint8_t* in)
+        void decryptBlock(uint8_t* out, const uint8_t* in) override
         {
             WORD_T* ct = (WORD_T*)(in);
             WORD_T* pt = (WORD_T*)(out);
@@ -120,8 +126,8 @@ namespace mockup { namespace crypto { namespace cipher {
 
             size_t rkidx = _num_rounds - 1;
             for (size_t i = 0; i < _num_rounds; ++i, --rkidx) {
-                y = ArxPrimitive<WORD_T>::rotr(x ^ y, _beta);
-                x = ArxPrimitive<WORD_T>::rotl((x ^ _rks[rkidx]) - y, _alpha);
+                y = Arx::rotr(x ^ y, _beta);
+                x = Arx::rotl((x ^ _rks[rkidx]) - y, _alpha);
             }
             
             pt[0] = y;
@@ -132,7 +138,7 @@ namespace mockup { namespace crypto { namespace cipher {
         void setParams(size_t keylen) {
             _num_words = keylen / sizeof(WORD_T);
 
-            switch(ArxPrimitive<WORD_T>::_wordsize) {
+            switch(Arx::_wordsize) {
             case 16:
                 _num_rounds = 22;
                 break;
@@ -150,7 +156,7 @@ namespace mockup { namespace crypto { namespace cipher {
                 break;
             }
 
-            if (ArxPrimitive<WORD_T>::_wordsize == 16) {
+            if (Arx::_wordsize == 16) {
                 _alpha = 7;
                 _beta = 2;
             }
