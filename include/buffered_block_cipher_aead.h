@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +22,26 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_UTIL_HEX_H__
-#define __MOCKUP_CRYPTO_UTIL_HEX_H__
+#ifndef __MOCKUP_CRYPTO_BUFFERED_BLOCK_CIPHER_AEAD_H__
+#define __MOCKUP_CRYPTO_BUFFERED_BLOCK_CIPHER_AEAD_H__
 
-#include <iomanip>
+#include "buffered_block_cipher.h"
 
-namespace mockup { namespace crypto { namespace util {
+namespace mockup { namespace crypto {
 
-    template<typename WORD_T>
-    void print_hex(const WORD_T* data, size_t count)
+    class BufferedBlockCipherAead : public BufferedBlockCipher 
     {
-        for (size_t i = 0; i < count; ++i) {
-            std::cout << std::hex << std::setw(sizeof(WORD_T) << 1) << std::setfill('0') << +data[i];
+    public:
+        BufferedBlockCipherAead() {};
+        virtual ~BufferedBlockCipherAead() {};
 
-            if ( (i + 1) % 4 == 0) {
-                std::cout << " ";
-            }
-
-            if ( (i + 1) % 32 == 0) {            
-                std::cout << std::endl;
-            }
-        }
-
-        std::cout << std::endl;
-    }
-
-    template<typename WORD_T>
-    void print_hex(const char* title, const WORD_T* data, size_t count)
-    {
-        std::cout << title << std::endl;
-        print_hex(data, count);
-    }
-
-}}}
+        virtual const std::string name() const = 0;
+        
+        virtual void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen, size_t taglen = 0) = 0;
+        virtual void updateAAD(const uint8_t* aad, size_t aadlen);
+        virtual size_t update(uint8_t* out, const uint8_t* msg, size_t msgLen);
+        virtual size_t doFinal(uint8_t* out);
+    };
+}}
 
 #endif
