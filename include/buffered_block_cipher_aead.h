@@ -35,12 +35,61 @@ namespace mockup { namespace crypto {
         BufferedBlockCipherAead() {};
         virtual ~BufferedBlockCipherAead() {};
 
+        void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen) override
+        {
+            throw "taglen should be specified";
+        }
+
+        size_t update(uint8_t* out, const uint8_t* msg, size_t msgLen)
+        {
+            auto outlen = 0;
+
+            if (_buffer.size() > 0) {
+                if (_buffer.size() + msgLen >= _blocksize) {
+                    auto gap = _blocksize - _buffer.size();
+                    _buffer.insert(_buffer.end(), msg, msg + gap);
+                    updateBlock(out, _buffer.data());
+
+                    _buffer.clear();
+                    
+                    out += _blocksize;
+                    msg += gap;
+                    outlen += _blocksize;
+                    msgLen -= gap;
+
+                } else {
+                    _buffer.insert(_buffer.end(), msg, msg + msgLen);
+                    msgLen = 0;
+                }
+            }
+
+            while (msgLen >= _blocksize) {
+                updateBlock(out, msg);
+
+                out += _blocksize;
+                msg += _blocksize;
+                outlen += _blocksize;
+                msgLen -= _blocksize;
+            }
+
+            if (msgLen > 0) {
+                _buffer.insert(_buffer.end(), msg, msg + msgLen);
+            }
+
+            return outlen;
+        }
+
+        size_t doFinal(uint8_t* out, const uint8_t* msg, size_t count)
+        {
+            auto outlen = update(out, msg, count);
+            outlen += doFinal(out);
+            return outlen;
+        }
+
         virtual const std::string name() const = 0;
-        
-        virtual void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen, size_t taglen = 0) = 0;
-        virtual void updateAAD(const uint8_t* aad, size_t aadlen);
-        virtual size_t update(uint8_t* out, const uint8_t* msg, size_t msgLen);
-        virtual size_t doFinal(uint8_t* out);
+        virtual void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen, size_t taglen) = 0;
+        virtual void updateAAD(const uint8_t* aad, size_t aadlen) = 0;
+        virtual size_t doFinal(uint8_t* out) = 0;
     };
 }}
 

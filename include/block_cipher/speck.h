@@ -31,10 +31,12 @@
 
 #include "../block_cipher.h"
 #include "../arx_primitive.h"
+#include "../util/safe_delete.h"
 
 namespace mockup { namespace crypto { namespace cipher {
 
     using namespace mockup::crypto;
+    using namespace mockup::crypto::util;
     
     template <typename WORD_T>
     class Speck : public BlockCipher, public ArxPrimitive<WORD_T> 
@@ -56,7 +58,7 @@ namespace mockup { namespace crypto { namespace cipher {
         }
         
         ~Speck() {
-            delete[] _rks;
+            safe_delete_array(_rks);
         }
 
         const std::string name() const override

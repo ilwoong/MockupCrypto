@@ -46,7 +46,7 @@ namespace mockup { namespace crypto {
         std::vector<uint8_t> _buffer;
 
     protected:
-        virtual size_t updateBlock(uint8_t* out, const uint8_t* in);
+        virtual void updateBlock(uint8_t* out, const uint8_t* in) = 0;
 
     public:
         BufferedBlockCipher() {};
@@ -54,8 +54,8 @@ namespace mockup { namespace crypto {
 
         virtual const std::string name() const = 0;
         
-        virtual void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen, size_t taglen = 0) = 0;
-        virtual size_t doFinal(uint8_t* out);
+        virtual void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen) = 0;
+        virtual size_t doFinal(uint8_t* out) = 0;
 
         void initCipher(std::shared_ptr<BlockCipher> cipher, const uint8_t* mk, size_t keylen)
         {
@@ -78,6 +78,7 @@ namespace mockup { namespace crypto {
                     
                     out += _blocksize;
                     msg += gap;
+                    outlen += _blocksize;
                     msgLen -= gap;
 
                 } else {

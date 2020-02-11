@@ -25,7 +25,9 @@
 #ifndef __MOCKUP_CRYPTO_UTIL_HEX_H__
 #define __MOCKUP_CRYPTO_UTIL_HEX_H__
 
+#include <iostream>
 #include <iomanip>
+#include <vector>
 
 namespace mockup { namespace crypto { namespace util {
 
@@ -44,14 +46,30 @@ namespace mockup { namespace crypto { namespace util {
             }
         }
 
-        std::cout << std::endl;
+        std::cout << std::dec << std::endl;
     }
 
     template<typename WORD_T>
     void print_hex(const char* title, const WORD_T* data, size_t count)
     {
-        std::cout << title << std::endl;
+        std::cout << title << "(" << count << ") : "<< std::endl;
         print_hex(data, count);
+    }
+
+    template<typename WORD_T>
+    void print_hex(const char* title, const std::vector<WORD_T>& vec)
+    {
+        std::cout << title << "(" << vec.size() << "): ";
+
+        for (auto i = 0; i < vec.size(); ++i) {
+            std::cout << std::hex << std::setw(sizeof(WORD_T) << 1) << std::setfill('0') << +vec[i];
+
+            if ( (i + 1) % 4 == 0) {
+                std::cout << " ";
+            }
+        }
+
+        std::cout << std::dec << std::endl;
     }
 
 }}}
