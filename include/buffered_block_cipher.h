@@ -25,9 +25,11 @@
 #ifndef __MOCKUP_CRYPTO_BUFFERED_BLOCK_CIPHER_H__
 #define __MOCKUP_CRYPTO_BUFFERED_BLOCK_CIPHER_H__
 
+#include <vector>
+
 #include "block_cipher.h"
 #include "named_algorithm.h"
-#include <vector>
+#include "padding.h"
 
 namespace mockup { namespace crypto {
 
@@ -44,12 +46,13 @@ namespace mockup { namespace crypto {
         CipherMode _mode;
         std::shared_ptr<BlockCipher> _cipher;
         std::vector<uint8_t> _buffer;
+        std::shared_ptr<Padding> _padding;
 
     protected:
         virtual void updateBlock(uint8_t* out, const uint8_t* in) = 0;
 
     public:
-        BufferedBlockCipher() {};
+        BufferedBlockCipher() : _cipher(nullptr), _padding(nullptr) {};
         virtual ~BufferedBlockCipher() {};
 
         virtual const std::string name() const = 0;

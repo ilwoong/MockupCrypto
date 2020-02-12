@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +22,35 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
-#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
+#include "../../include/padding/pkcs7_padding.h"
 
-namespace mockup { namespace crypto {
+using namespace mockup::crypto::padding;
 
-    template <typename WORD_T>
-    class ArxPrimitive {
-    protected:
-        size_t _wordsize;
+const std::string Pkcs7Padding::name() const
+{
+    return "PKCS7Padding";
+}
 
-    public:
-        ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
-        virtual ~ArxPrimitive() {}
+void Pkcs7Padding::Pad(uint8_t* dst, const uint8_t* src, size_t srclen)
+{
+    auto pad = static_cast<uint8_t>(_blocksize - srclen);
+    std::copy(src, src + srclen, dst);
+    std::fill(dst + srclen, dst + _blocksize, pad);
+}
 
-    protected:
-        inline WORD_T rotl(WORD_T value, size_t rot) const noexcept
-        {
-            return (value << rot) | (value >> (_wordsize - rot));
+size_t Pkcs7Padding::UnPad(uint8_t* dst, const uint8_t* src)
+{
+    auto pad = src[_blocksize - 1];
+    size_t length = _blocksize - pad;
+
+    for (auto i = length; i < _blocksize; ++i) {
+        if (src[i] != pad) {
+            throw "Invalid padding";
         }
+    }
 
-        inline WORD_T rotr(WORD_T value, size_t rot) const noexcept
-        {
-            return (value >> rot) | (value << (_wordsize - rot));
-        }
+    std::copy(src, src + length, dst);
 
-        void xor_array(WORD_T* out, const WORD_T* lhs, const WORD_T* rhs, size_t count) const
-        {
-            for (size_t i = 0; i < count; ++i) {
-                out[i] = lhs[i] xor rhs[i];
-            }
-        }
-    };
-}}
-
-#endif
+    return length;
+}
 

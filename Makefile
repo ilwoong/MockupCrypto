@@ -5,7 +5,7 @@ SRC_MODES = src/mode/ocb3.cpp src/mode/ctr.cpp include/buffered_block_cipher.h i
 
 .PHONY: all clean
 
-all: test_speck test_lsh test_simon test_lsh test_aes test_aesni
+all: test_speck test_lsh test_simon test_lsh test_aes test_aesni test_lea test_cham
 
 test_speck : test/block_cipher/test_speck.cpp
 	$(CC) $(CPPFLAGS) $^ -o $@
@@ -22,10 +22,16 @@ test_aes : test/block_cipher/test_aes.cpp test/block_cipher/test_ocb.cpp src/blo
 test_aesni : test/block_cipher/test_aesni.cpp test/block_cipher/test_ocb.cpp src/block_cipher/aesni.cpp $(SRC_MODES)
 	$(CC) $(CPPFLAGS) $^ -o $@ -maes
 
+test_lea : test/block_cipher/test_lea.cpp src/block_cipher/lea.cpp
+	$(CC) $(CPPFLAGS) $^ -o $@ 
+
+test_cham : test/block_cipher/test_cham.cpp 
+	$(CC) $(CPPFLAGS) $^ -o $@ 
+
 rebuild:
 	make clean
-	make -j8
+	make -j16
 
 
 clean:
-	rm -rf test_speck test_lsh test_simon test_lsh test_aes test_aesni
+	rm -rf test_speck test_lsh test_simon test_lsh test_aes test_aesni test_lea test_cham

@@ -27,9 +27,9 @@
 #include <cstring>
 
 #include "../../include/block_cipher/simon.h"
-#include "../../include/util/hex.h"
+#include "test_tool.h"
 
-using namespace mockup::crypto::cipher;
+using namespace mockup::crypto::block_cipher;
 using namespace mockup::crypto::util;
 
 struct st_testvector {
@@ -80,64 +80,55 @@ static const st_testvector TV128_256 {
     {0x68, 0xb8, 0xe7, 0xef, 0x87, 0x2a, 0xf7, 0x3b, 0xa0, 0xa3, 0xc8, 0xaf, 0x79, 0x55, 0x2b, 0x8d},
 };
 
-void test_cipher(BlockCipher* cipher, size_t keylen, const st_testvector tv)
-{
-    const size_t blocksize = cipher->blocksize();
-    uint8_t enc[blocksize] = {0};
-    uint8_t dec[blocksize] = {0};
-    
-    cipher->init(tv.mk, keylen);
-    cipher->encryptBlock(enc, tv.pt);
-    cipher->decryptBlock(dec, tv.ct);
-
-    std::cout << cipher->name() << std::endl;
-    if (memcmp(tv.ct, enc, blocksize) != 0) {
-        print_hex("    ct:", tv.ct, blocksize);
-        print_hex("   enc:", enc, blocksize);
-    } else {
-        std::cout << "   enc pass" << std::endl;
-    }
-
-    if (memcmp(tv.pt, dec, blocksize) != 0) {
-        print_hex("    pt:", tv.pt, blocksize);
-        print_hex("   dec:", dec, blocksize);
-    } else {
-        std::cout << "   dec pass" << std::endl;
-    }
-    std::cout << std::endl;
+static void test_32_64() {
+    constexpr auto blocksize = 4;
+    constexpr auto keysize = 8;
+    auto tv = TV32_64;
+    auto cipher = std::make_shared<Simon32>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_32_64() {
-    Simon32 simon;
-    test_cipher(&simon, BIT_64, TV32_64);
+static void test_64_96() {
+    constexpr auto blocksize = 8;
+    constexpr auto keysize = 12;
+    auto tv = TV64_96;
+    auto cipher = std::make_shared<Simon64>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_64_96() {
-    Simon64 simon;
-    test_cipher(&simon, BIT_96, TV64_96);
+static void test_64_128() {
+    constexpr auto blocksize = 8;
+    constexpr auto keysize = 16;
+    auto tv = TV64_128;
+    auto cipher = std::make_shared<Simon64>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_64_128() {
-    Simon64 simon;
-    test_cipher(&simon, BIT_128, TV64_128);
+static void test_128_128() {
+    constexpr auto blocksize = 16;
+    constexpr auto keysize = 16;
+    auto tv = TV128_128;
+    auto cipher = std::make_shared<Simon128>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_128_128() {
-    Simon128 simon;
-    test_cipher(&simon, BIT_128, TV128_128);
+static void test_128_192() {
+    constexpr auto blocksize = 16;
+    constexpr auto keysize = 24;
+    auto tv = TV128_192;
+    auto cipher = std::make_shared<Simon128>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_128_192() {
-    Simon128 simon;
-    test_cipher(&simon, BIT_192, TV128_192);
+static void test_128_256() {
+    constexpr auto blocksize = 16;
+    constexpr auto keysize = 32;
+    auto tv = TV128_256;
+    auto cipher = std::make_shared<Simon128>();
+    test_cipher<blocksize, keysize>(cipher, tv.mk, tv.pt, tv.ct);
 }
 
-void test_128_256() {
-    Simon128 simon;
-    test_cipher(&simon, BIT_256, TV128_256);
-}
-
-int main()
+int main(int argc, const char** argv)
 {
     test_32_64();
     test_64_96();

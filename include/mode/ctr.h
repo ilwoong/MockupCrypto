@@ -28,7 +28,7 @@
 #include "../buffered_block_cipher.h"
 #include <vector>
 
-namespace mockup { namespace crypto { namespace mode{
+namespace mockup { namespace crypto { namespace mode {
 
     class CTR : public BufferedBlockCipher
     {

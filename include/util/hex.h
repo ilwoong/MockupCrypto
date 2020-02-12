@@ -40,10 +40,6 @@ namespace mockup { namespace crypto { namespace util {
             if ( (i + 1) % 4 == 0) {
                 std::cout << " ";
             }
-
-            if ( (i + 1) % 32 == 0) {            
-                std::cout << std::endl;
-            }
         }
 
         std::cout << std::dec << std::endl;
@@ -52,7 +48,7 @@ namespace mockup { namespace crypto { namespace util {
     template<typename WORD_T>
     void print_hex(const char* title, const WORD_T* data, size_t count)
     {
-        std::cout << title << "(" << count << ") : "<< std::endl;
+        std::cout << title << "(" << count << "): ";
         print_hex(data, count);
     }
 

@@ -37,7 +37,7 @@ namespace mockup { namespace crypto { namespace block_cipher {
 
     public:
         AesNI();
-        virtual ~AesNI();
+        ~AesNI();
 
         const std::string name() const override;
         size_t keysize() const override;

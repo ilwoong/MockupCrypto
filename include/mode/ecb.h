@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +22,29 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
-#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
+#ifndef __MOCKUP_CRYPTO_MODE_ECB_H__
+#define __MOCKUP_CRYPTO_MODE_ECB_H__
 
-namespace mockup { namespace crypto {
+#include "../buffered_block_cipher.h"
 
-    template <typename WORD_T>
-    class ArxPrimitive {
-    protected:
-        size_t _wordsize;
+namespace mockup { namespace crypto { namespace mode {
 
+    class Ecb : public BufferedBlockCipher
+    {
     public:
-        ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
-        virtual ~ArxPrimitive() {}
+        const std::string name() const override;
+        
+        void initMode(CipherMode mode, const uint8_t* iv, size_t ivLen) override;
+        size_t doFinal(uint8_t* out) override;
 
     protected:
-        inline WORD_T rotl(WORD_T value, size_t rot) const noexcept
-        {
-            return (value << rot) | (value >> (_wordsize - rot));
-        }
+        void updateBlock(uint8_t* out, const uint8_t* in) override;
+        
+    private:
+        size_t DoFinalWithPadding(uint8_t* out);
+        size_t DoFinalWithoutPadding(uint8_t* out);
 
-        inline WORD_T rotr(WORD_T value, size_t rot) const noexcept
-        {
-            return (value >> rot) | (value << (_wordsize - rot));
-        }
-
-        void xor_array(WORD_T* out, const WORD_T* lhs, const WORD_T* rhs, size_t count) const
-        {
-            for (size_t i = 0; i < count; ++i) {
-                out[i] = lhs[i] xor rhs[i];
-            }
-        }
     };
-}}
+}}}
 
 #endif
-

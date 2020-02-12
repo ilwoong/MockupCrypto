@@ -33,7 +33,7 @@
 #include "../arx_primitive.h"
 #include "../util/safe_delete.h"
 
-namespace mockup { namespace crypto { namespace cipher {
+namespace mockup { namespace crypto { namespace block_cipher {
 
     using namespace mockup::crypto;
     using namespace mockup::crypto::util;

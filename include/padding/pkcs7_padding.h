@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +22,23 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
-#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
+#ifndef __MOCKUP_CRYPTO_PADDING_PKCS7_PADDING_H__
+#define __MOCKUP_CRYPTO_PADDING_PKCS7_PADDING_H__
 
-namespace mockup { namespace crypto {
+#include "../padding.h"
 
-    template <typename WORD_T>
-    class ArxPrimitive {
-    protected:
-        size_t _wordsize;
+namespace mockup { namespace crypto { namespace padding {
+
+    class Pkcs7Padding : public Padding {
 
     public:
-        ArxPrimitive() : _wordsize(sizeof(WORD_T) << 3) {}
-        virtual ~ArxPrimitive() {}
+        Pkcs7Padding(size_t blocksize) : Padding(blocksize) {};
+        ~Pkcs7Padding() = default;
 
-    protected:
-        inline WORD_T rotl(WORD_T value, size_t rot) const noexcept
-        {
-            return (value << rot) | (value >> (_wordsize - rot));
-        }
-
-        inline WORD_T rotr(WORD_T value, size_t rot) const noexcept
-        {
-            return (value >> rot) | (value << (_wordsize - rot));
-        }
-
-        void xor_array(WORD_T* out, const WORD_T* lhs, const WORD_T* rhs, size_t count) const
-        {
-            for (size_t i = 0; i < count; ++i) {
-                out[i] = lhs[i] xor rhs[i];
-            }
-        }
+        const std::string name() const override;
+        void Pad(uint8_t* dst, const uint8_t* src, size_t srclen) override;
+        size_t UnPad(uint8_t* dst, const uint8_t* src);
     };
-}}
+}}}
 
 #endif
-

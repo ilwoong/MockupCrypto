@@ -25,19 +25,26 @@
 #ifndef __MOCKUP_CRYPTO_BLOCK_CIPHER_LEA_H__
 #define __MOCKUP_CRYPTO_BLOCK_CIPHER_LEA_H__
 
+#include <array>
+
 #include "../block_cipher.h"
+#include "../arx_primitive.h"
 
 namespace mockup { namespace crypto { namespace block_cipher {
 
-    class Lea : public BlockCipher {
+    class Lea : public BlockCipher, public ArxPrimitive<uint32_t> {
+
+        using Arx = ArxPrimitive<uint32_t>;
 
     private:
         size_t _keysize;
-        uint8_t* _rks;
+        uint32_t* _rks;
+        size_t _rounds;
+        std::array<uint32_t, 4> _block;
 
     public:
         Lea();
-        virtual ~Lea();
+        ~Lea();
 
         const std::string name() const override;
         size_t keysize() const override;
@@ -48,7 +55,9 @@ namespace mockup { namespace crypto { namespace block_cipher {
         void decryptBlock(uint8_t* out, const uint8_t* in) override;
 
     private:
-        size_t rounds() const;
+        void init128(const uint32_t* mk);
+        void init192(const uint32_t* mk);
+        void init256(const uint32_t* mk);
     };
 }}}
 
