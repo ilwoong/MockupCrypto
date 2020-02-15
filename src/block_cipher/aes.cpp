@@ -492,10 +492,10 @@ static void inv_mix_columns(uint8_t* in)
 
 static void aes128_keygen(uint8_t* rks, const uint8_t* mk)
 {
+    std::copy(mk, mk + 16, rks);
+
     const uint32_t* key = (const uint32_t*) mk;
     uint32_t* rk = (uint32_t*) rks;
-
-    std::copy(key, key + 16, rk);
 
     for (int i = 0; i < 10; ++i) {
         rk[4] = rk[0] ^ sub_word(rot32r8(rk[3])) ^ RC[i];
@@ -508,10 +508,10 @@ static void aes128_keygen(uint8_t* rks, const uint8_t* mk)
 
 static void aes192_keygen(uint8_t* rks, const uint8_t* mk)
 {
+    std::copy(mk, mk + 24, rks);
+
     const uint32_t* key = (const uint32_t*) mk;
     uint32_t* rk = (uint32_t*) rks;
-
-    std::copy(key, key + 24, rk);
 
     for (int i = 0; i < 7; ++i) {
         rk[6] = rk[0] ^ sub_word(rot32r8(rk[5])) ^ RC[i];
@@ -532,10 +532,10 @@ static void aes192_keygen(uint8_t* rks, const uint8_t* mk)
 
 static void aes256_keygen(uint8_t* rks, const uint8_t* mk)
 {
+    std::copy(mk, mk + 32, rks);
+
     const uint32_t* key = (const uint32_t*) mk;
     uint32_t* rk = (uint32_t*) rks;
-
-    std::copy(key, key + 32, rk);
 
     for (int i = 0; i < 7; ++i) {
         rk[8] = rk[0] ^ sub_word(rot32r8(rk[7])) ^ RC[i];
