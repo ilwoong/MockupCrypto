@@ -371,26 +371,11 @@ static uint32_t sub_word(uint32_t value)
     return value;
 }
 
-static void add_round_keys(uint8_t* block, const uint8_t* rks) {
-   block[0] ^= rks[0];
-   block[1] ^= rks[4];
-   block[2] ^= rks[8];
-   block[3] ^= rks[12];
-
-   block[4] ^= rks[1];
-   block[5] ^= rks[5];
-   block[6] ^= rks[9];
-   block[7] ^= rks[13];
-
-   block[8] ^= rks[2];
-   block[9] ^= rks[6];
-   block[10] ^= rks[10];
-   block[11] ^= rks[14];
-
-   block[12] ^= rks[3];
-   block[13] ^= rks[7];
-   block[14] ^= rks[11];
-   block[15] ^= rks[15];
+static void add_round_keys(uint8_t* block, const uint8_t* rks) 
+{
+    for (int i = 0; i < 16; ++i) {
+        block[i] ^= rks[i];
+    }
 }
 
 static void swap(uint8_t* block, size_t pos1, size_t pos2)
@@ -400,21 +385,55 @@ static void swap(uint8_t* block, size_t pos1, size_t pos2)
     block[pos2] = tmp;
 }
 
-static void transpose(uint8_t* block)
-{
-    swap(block, 1, 4);
-    swap(block, 2, 8);
-    swap(block, 3, 12);
-    swap(block, 6, 9);
-    swap(block, 7, 13);
-    swap(block, 11, 14);
-}
-
 static void sub_bytes(uint8_t* block)
 {
     for (int i = 0; i < 16; ++i) {
         block[i] = SBOX[block[i]];
     }
+}
+
+static void shift_rows(uint8_t* block)
+{
+    uint8_t tmp = block[1];
+    block[1] = block[5];
+    block[5] = block[9];
+    block[9] = block[13];
+    block[13] = tmp;
+
+    swap(block, 2, 10);
+    swap(block, 6, 14);
+
+    tmp = block[15];
+    block[15] = block[11];
+    block[11] = block[7];
+    block[7] = block[3];
+    block[3] = tmp;
+}
+
+static void sub_bytes_and_mix_columns(uint8_t* in)
+{
+    for (int i = 0; i < 16; i += 4) {
+        uint32_t value = SMC0[in[i]] ^ SMC1[in[i + 1]] ^ SMC2[in[i + 2]] ^ SMC3[in[i + 3]];
+
+        in[i    ] = (value >> 24) & 0xff;
+        in[i + 1] = (value >> 16) & 0xff;
+        in[i + 2] = (value >>  8) & 0xff;
+        in[i + 3] = (value      ) & 0xff;
+    }
+}
+
+static inline void encrypt_round(uint8_t* block, const uint8_t* rk)
+{
+    shift_rows(block);
+    sub_bytes_and_mix_columns(block);
+    add_round_keys(block, rk);
+}
+
+static inline void encrypt_last_round(uint8_t* block, const uint8_t* rk)
+{
+    sub_bytes(block);
+    shift_rows(block);
+    add_round_keys(block, rk);
 }
 
 static void inv_sub_bytes(uint8_t* block) 
@@ -424,63 +443,33 @@ static void inv_sub_bytes(uint8_t* block)
     }
 }
 
-static void shift_rows(uint8_t* block)
-{
-    uint8_t tmp = block[4];
-    block[4] = block[5];
-    block[5] = block[6];
-    block[6] = block[7];
-    block[7] = tmp;
-
-    swap(block, 8, 10);
-    swap(block, 9, 11);
-
-    tmp = block[15];
-    block[15] = block[14];
-    block[14] = block[13];
-    block[13] = block[12];
-    block[12] = tmp;
-}
-
 static void inv_shift_rows(uint8_t* block)
 {
-    uint8_t tmp = block[7];
-    block[7] = block[6];
-    block[6] = block[5];
-    block[5] = block[4];
-    block[4] = tmp;
+    uint8_t tmp = block[13];
+    block[13] = block[9];
+    block[9] = block[5];
+    block[5] = block[1];
+    block[1] = tmp;
 
-    swap(block, 8, 10);
-    swap(block, 9, 11);
+    swap(block, 2, 10);
+    swap(block, 6, 14);
 
-    tmp = block[12];
-    block[12] = block[13];
-    block[13] = block[14];
-    block[14] = block[15];
+    tmp = block[3];
+    block[3] = block[7];
+    block[7] = block[11];
+    block[11] = block[15];
     block[15] = tmp;
-}
-
-static void sub_bytes_and_mix_columns(uint8_t* in)
-{
-    for (int i = 0; i < 4; ++i) {
-        uint32_t value = SMC0[in[i]] ^ SMC1[in[i + 4]] ^ SMC2[in[i + 8]] ^ SMC3[in[i + 12]];
-
-        in[i     ] = (value >> 24) & 0xff;
-        in[i +  4] = (value >> 16) & 0xff;
-        in[i +  8] = (value >>  8) & 0xff;
-        in[i + 12] = (value      ) & 0xff;
-    }
 }
 
 static void inv_sub_bytes_and_mix_columns(uint8_t* in)
 {
-    for (int i = 0; i < 4; ++i) {
-        uint32_t value = ISMC0[in[i]] ^ ISMC1[in[i + 4]] ^ ISMC2[in[i + 8]] ^ ISMC3[in[i + 12]];
+    for (int i = 0; i < 16; i += 4) {
+        uint32_t value = ISMC0[in[i]] ^ ISMC1[in[i + 1]] ^ ISMC2[in[i + 2]] ^ ISMC3[in[i + 3]];
 
-        in[i     ] = (value >> 24) & 0xff;
-        in[i +  4] = (value >> 16) & 0xff;
-        in[i +  8] = (value >>  8) & 0xff;
-        in[i + 12] = (value      ) & 0xff;
+        in[i    ] = (value >> 24) & 0xff;
+        in[i + 1] = (value >> 16) & 0xff;
+        in[i + 2] = (value >>  8) & 0xff;
+        in[i + 3] = (value      ) & 0xff;
     }
 }
 
@@ -488,6 +477,21 @@ static void inv_mix_columns(uint8_t* in)
 {
     sub_bytes(in);
     inv_sub_bytes_and_mix_columns(in);
+}
+
+static inline void decrypt_round(uint8_t* block, const uint8_t* rk)
+{
+    inv_shift_rows(block);
+    inv_sub_bytes(block);
+    add_round_keys(block, rk);
+    inv_mix_columns(block);
+}
+
+static inline void decrypt_last_round(uint8_t* block, const uint8_t* rk)
+{
+    inv_sub_bytes(block);
+    inv_shift_rows(block);
+    add_round_keys(block, rk);
 }
 
 static void aes128_keygen(uint8_t* rks, const uint8_t* mk)
@@ -616,23 +620,16 @@ void Aes::encryptBlock(uint8_t* out, const uint8_t* in)
 
     uint8_t block[16] = {0};
     std::copy(in, in + 16, block);
-    transpose(block);
 
     add_round_keys(block, rks);
     rks += 16;
 
-    for (int i = 0; i < rounds - 1; ++i, rks += 16)
-    {
-        shift_rows(block);
-        sub_bytes_and_mix_columns(block);
-        add_round_keys(block, rks);
+    for (int i = 0; i < rounds - 1; ++i, rks += 16) {
+        encrypt_round(block, rks);
     }
 
-    sub_bytes(block);
-    shift_rows(block);
-    add_round_keys(block, rks);
+    encrypt_last_round(block, rks);
 
-    transpose(block);
     std::copy(block, block + 16, out);
 }
 
@@ -643,26 +640,18 @@ void Aes::decryptBlock(uint8_t* out, const uint8_t* in)
     
     uint8_t block[16] = {0};
     std::copy(in, in + 16, block);
-    transpose(block);
 
     rks += 16 * rounds;
 
     add_round_keys(block, rks);
     rks -= 16;
 
-    for (int i = 0; i < rounds - 1; ++i, rks -= 16)
-    {  
-        inv_shift_rows(block);
-        inv_sub_bytes(block);
-        add_round_keys(block, rks);
-        inv_mix_columns(block);
+    for (int i = 0; i < rounds - 1; ++i, rks -= 16) {
+        decrypt_round(block, rks);
     }
 
-    inv_sub_bytes(block);
-    inv_shift_rows(block);
-    add_round_keys(block, rks);
+    decrypt_last_round(block, rks);
 
-    transpose(block);
     std::copy(block, block + 16, out);
 }
 
