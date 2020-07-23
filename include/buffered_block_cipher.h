@@ -71,23 +71,17 @@ namespace mockup { namespace crypto {
         {
             auto outlen = 0;
 
-            if (_buffer.size() > 0) {
-                if (_buffer.size() + msgLen >= _blocksize) {
-                    auto gap = _blocksize - _buffer.size();
-                    _buffer.insert(_buffer.end(), msg, msg + gap);
-                    updateBlock(out, _buffer.data());
+            auto gap = _blocksize - _buffer.size();
+            if (msgLen >= gap) {
+                _buffer.insert(_buffer.end(), msg, msg + gap);
+                updateBlock(out, _buffer.data());
 
-                    _buffer.clear();
-                    
-                    out += _blocksize;
-                    msg += gap;
-                    outlen += _blocksize;
-                    msgLen -= gap;
+                _buffer.clear();
 
-                } else {
-                    _buffer.insert(_buffer.end(), msg, msg + msgLen);
-                    msgLen = 0;
-                }
+                out += _blocksize;
+                msg += gap;
+                outlen += _blocksize;
+                msgLen -= gap;
             }
 
             while (msgLen >= _blocksize) {

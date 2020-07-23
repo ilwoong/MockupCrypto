@@ -76,27 +76,21 @@ namespace mockup { namespace crypto { namespace hash {
         }
 
         void update(const uint8_t* data, size_t length) override
-        {
-            if (_blk_offset > 0) {
-                size_t gap = _blocksize - _blk_offset;
+        {            
+            size_t gap = _blocksize - _blk_offset;
 
-                if (length >= gap) {
-                    std::copy(data, data + gap, std::begin(_block) + _blk_offset);
-                    compress(_block.data());
-                    _blk_offset = 0;
-                    data += gap;
-                    length -= gap;
+            if (length >= gap) {
+                std::copy(data, data + gap, std::begin(_block) + _blk_offset);
+                compress(_block.data());
 
-                } else {
-                    std::copy(data, data + length, std::begin(_block) + _blk_offset);
-                    _blk_offset += length;
-                    data += length;
-                    length = 0;
-                }
-            }
+                _blk_offset = 0;
+                data += gap;
+                length -= gap;
+            } 
             
             while (length >= _blocksize) {
                 compress(data);
+                
                 data += _blocksize;
                 length -= _blocksize;
             }
@@ -107,20 +101,22 @@ namespace mockup { namespace crypto { namespace hash {
             }
         }
 
-        void do_final(uint8_t* output) override
+        std::vector<uint8_t> doFinal() override
         {
-            WORD_T* result = (WORD_T*) output;
-            
+            std::vector<uint8_t> output;
+            output.assign(_output_length, 0);
+
             _block[_blk_offset++] = static_cast<uint8_t>(0x80);
             std::fill(std::begin(_block) + _blk_offset, std::end(_block), 0);
             compress(_block.data());
 
-            const WORD_T* lhs = _state.data();
-            const WORD_T* rhs = lhs + 8;
-            const size_t out_words = _output_length / sizeof(WORD_T);
-            this->xor_array(result, lhs, rhs, out_words);
+            const auto lhs = reinterpret_cast<uint8_t*>(_state.data());
+            const auto rhs = reinterpret_cast<uint8_t*>(_state.data() + 8);            
+            ArxPrimitive<WORD_T>::xor_array(output.data(), lhs, rhs, _output_length);
 
             init();
+
+            return output;
         }
 
     private:

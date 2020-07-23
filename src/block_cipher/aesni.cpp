@@ -177,6 +177,7 @@ const std::string AesNI::name() const
 
 size_t AesNI::keysize() const 
 {
+    return _keysize;
 }
 
 size_t AesNI::blocksize() const 

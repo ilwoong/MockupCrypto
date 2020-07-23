@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
-#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_HPP__
+#ifndef __MOCKUP_CRYPTO_ARX_PRIMITIVE_H__
+#define __MOCKUP_CRYPTO_ARX_PRIMITIVE_H__
 
 namespace mockup { namespace crypto {
 
@@ -47,7 +47,8 @@ namespace mockup { namespace crypto {
             return (value >> rot) | (value << (_wordsize - rot));
         }
 
-        void xor_array(WORD_T* out, const WORD_T* lhs, const WORD_T* rhs, size_t count) const
+        template <typename T>
+        void xor_array(T* out, const T* lhs, const T* rhs, size_t count) const
         {
             for (size_t i = 0; i < count; ++i) {
                 out[i] = lhs[i] xor rhs[i];

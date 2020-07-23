@@ -22,53 +22,95 @@
  * THE SOFTWARE.
  */
 
+#include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <memory>
 
 #include "../../include/hash/lsh.h"
 #include "../../include/util/hex.h"
+#include "../test_vector_reader.h"
 
+using namespace mockup::crypto;
 using namespace mockup::crypto::hash;
 using namespace mockup::crypto::util;
 
-void test_lsh256()
+static std::shared_ptr<Hash> getLshInstance(int lshsize, int outsize)
 {
-    uint8_t digest[32] = {0, };
-    uint8_t data[384] = {0, };
+    std::shared_ptr<Hash> lsh = nullptr;
 
-    for (size_t i = 0; i < 384; ++i) {
-        data[i] = (uint8_t) (i & 0xff);
+    switch(lshsize) {
+    case 256:
+        lsh = std::make_shared<Lsh256>(outsize);
+        break;
+
+    case 512:
+        lsh = std::make_shared<Lsh512>(outsize);
+        break;
+
+    default:
+        break;
     }
 
-    Lsh256 lsh;
-    lsh.init();
-    lsh.update(data, 384);
-    lsh.do_final(digest);
-
-    std::cout << lsh.name() << std::endl;
-    print_hex(digest, 32);
+    return lsh;
 }
 
-void test_lsh512()
+static TestVectorReader getTestVector(std::string title)
 {
-    uint8_t digest[64] = {0, };
-    uint8_t data[384] = {0, };
+    std::ostringstream path;
+    path << "testvector/lsh/"<< title << ".txt";
 
-    for (size_t i = 0; i < 384; ++i) {
-        data[i] = (uint8_t) (i & 0xff);
+    TestVectorReader tvr;
+    tvr.open(path.str());
+
+    return tvr;
+}
+
+static void print_verify_result(const std::string& title, size_t countPassed, size_t countTotal)
+{
+    std::cout << title;
+    std::cout << ((countPassed == countTotal) ? " passed" : " FAILED");
+    std::cout << " (" << countPassed << " / " << countTotal << ")" << std::endl;
+}
+
+static void test_lsh(int lshsize, int outsize, std::string msgType)
+{
+    auto lsh = getLshInstance(lshsize, outsize);
+    auto title = lsh->name() + "_" + msgType;
+    auto tvr = getTestVector(title);
+    auto len = tvr.get("Len");
+
+    size_t countPassed = 0;
+    for (int i = 0; i < len.size(); ++i) {
+        auto msg = tvr.getByteArray(i, "Msg");
+        auto md = tvr.getByteArray(i, "MD");
+        
+        lsh->init();
+        lsh->update(msg);
+        auto digest = lsh->doFinal();
+
+        if (std::equal(md.begin(), md.end(), digest.begin())) {
+            countPassed += 1;
+        }
     }
 
-    Lsh512 lsh;
-    lsh.init();
-    lsh.update(data, 384);
-    lsh.do_final(digest);
-
-    std::cout << lsh.name() << std::endl;
-    print_hex(digest, 64);
+    print_verify_result(title, countPassed, len.size());
 }
 
-int main() {
+static void verify_testvector(std::string msgType) {
+    test_lsh(256, mockup::crypto::BIT_224, msgType);
+    test_lsh(256, mockup::crypto::BIT_256, msgType);
 
-    test_lsh256();
-    test_lsh512();
+    test_lsh(512, mockup::crypto::BIT_224, msgType);
+    test_lsh(512, mockup::crypto::BIT_256, msgType);
+    test_lsh(512, mockup::crypto::BIT_384, msgType);
+    test_lsh(512, mockup::crypto::BIT_512, msgType);
+}
+
+int main(int argc, const char** argv) 
+{
+    verify_testvector("ShortMsg");
+    verify_testvector("LongMsg");
+
     return 0;
 }

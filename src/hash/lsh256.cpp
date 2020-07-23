@@ -26,9 +26,12 @@
 
 using namespace mockup::crypto::hash;
 
-Lsh256::Lsh256()
-{   
-    this->_output_length = BIT_256;
+Lsh256::Lsh256() : Lsh256(BIT_256)
+{}
+
+Lsh256::Lsh256(size_t outlen)
+{
+    this->_output_length = outlen;
 
     this->_alpha1 = 29;
     this->_beta1 = 1;
@@ -71,11 +74,6 @@ Lsh256::Lsh256()
 Lsh256::~Lsh256()
 {
     init();
-}
-
-Lsh256::Lsh256(size_t outlen)
-{
-    this->_output_length = outlen;
 }
 
 void Lsh256::init()

@@ -13,7 +13,7 @@ test_speck : test/block_cipher/test_speck.cpp
 test_simon : test/block_cipher/test_simon.cpp
 	$(CC) $(CPPFLAGS) $^ -o $@
 
-test_lsh : test/hash/test_lsh.cpp src/hash/lsh256.cpp src/hash/lsh512.cpp
+test_lsh : test/hash/test_lsh.cpp test/test_vector_reader.cpp src/util/byte_array.cpp src/hash/lsh256.cpp src/hash/lsh512.cpp
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 test_aes : test/block_cipher/test_aes.cpp test/block_cipher/test_ocb.cpp src/block_cipher/aes.cpp $(SRC_MODES)

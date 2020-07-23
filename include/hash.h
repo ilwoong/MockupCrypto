@@ -26,6 +26,7 @@
 #define __MOCKUP_CRYPTO_HASH_H__
 
 #include "named_algorithm.h"
+#include <vector>
 
 namespace mockup { namespace crypto { 
 
@@ -36,7 +37,17 @@ namespace mockup { namespace crypto {
 
         virtual void init() = 0;
         virtual void update(const uint8_t* data, size_t length) = 0;
-        virtual void do_final(uint8_t* output) = 0;
+        virtual std::vector<uint8_t> doFinal() = 0;
+
+        void update(const std::vector<uint8_t>& data) {
+            update(data.data(), data.size());
+        }
+
+        void doFinal(uint8_t* output) 
+        {
+            auto md = doFinal();
+            std::copy(md.begin(), md.end(), output);
+        }
     };
 }}
 

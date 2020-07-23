@@ -26,9 +26,12 @@
 
 using namespace mockup::crypto::hash;
 
-Lsh512::Lsh512()
-{   
-    this->_output_length = BIT_512;
+Lsh512::Lsh512() : Lsh512(BIT_512)
+{}
+
+Lsh512::Lsh512(size_t outlen)
+{
+    this->_output_length = outlen;
 
     this->_alpha1 = 23;
     this->_beta1 = 59;
@@ -96,11 +99,6 @@ Lsh512::Lsh512()
         0x8eeaeb91d66ed539L, 0x73d8a1549dfd7e06L, 0x0387f2ffe3f13a9bL, 0xa5004995aac15193L,
         0x682f81c73efdda0dL, 0x2fb55925d71d268dL, 0xcc392d2901e58a3dL, 0xaa666ab975724a42L,
     };
-}
-
-Lsh512::Lsh512(size_t outlen)
-{
-    this->_output_length = outlen;
 }
 
 Lsh512::~Lsh512()
