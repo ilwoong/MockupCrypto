@@ -16,6 +16,7 @@ public:
     void printInfo() const;
 
     const std::vector<std::string>& get(std::string key);
+    size_t getSize(size_t i, std::string key);
     std::vector<uint8_t> getByteArray(size_t i, std::string key);
 };
 

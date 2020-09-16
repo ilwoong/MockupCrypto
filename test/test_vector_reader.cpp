@@ -75,6 +75,20 @@ const std::vector<std::string>& TestVectorReader::get(std::string key)
     return container[key];
 }
 
+size_t TestVectorReader::getSize(size_t i, std::string key)
+{
+    size_t value = 0;
+
+    if (container.find(key) == container.end()) {
+        return value;
+    }
+
+    std::stringstream ss(container[key][i]);
+    ss >> value;
+
+    return value;
+}
+
 std::vector<uint8_t> TestVectorReader::getByteArray(size_t i, std::string key)
 {
     auto result = std::vector<uint8_t>{};

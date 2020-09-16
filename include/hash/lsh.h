@@ -60,6 +60,14 @@ namespace mockup { namespace crypto { namespace hash {
         Lsh() : _blocksize(sizeof(WORD_T) << 5) {}
         virtual ~Lsh() {}
 
+        virtual size_t blocksize() const override {
+            return _blocksize;
+        }
+
+        virtual size_t outputsize() const override {
+            return _output_length;
+        }
+
         const std::string name() const override
         {
             std::stringstream ss;

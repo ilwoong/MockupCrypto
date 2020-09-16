@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +22,64 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_HASH_H__
-#define __MOCKUP_CRYPTO_HASH_H__
+#ifndef __MOCKUP_CRYPTO_MAC_H__
+#define __MOCKUP_CRYPTO_MAC_H__
 
 #include "named_algorithm.h"
 #include <vector>
 
 namespace mockup { namespace crypto { 
 
-    class Hash : public NamedAlgorithm {
+    class Mac : public NamedAlgorithm {
+    protected:
+        size_t blocksize;
+        size_t offset;
+        std::vector<uint8_t> block;
+
     public:
-        Hash() = default;
-        virtual ~Hash() = default;
+        Mac() = default;
+        virtual ~Mac() = default;
 
-        virtual size_t blocksize() const = 0;
-        virtual size_t outputsize() const = 0;
-
-        virtual void init() = 0;
-        virtual void update(const uint8_t* data, size_t length) = 0;
+        virtual void init(const uint8_t* key, size_t keysize) = 0;
+        virtual void updateBlock(const uint8_t* data) = 0;
         virtual std::vector<uint8_t> doFinal() = 0;
+
+        void update(const uint8_t* data, size_t length) {
+            auto gap = blocksize - offset;
+
+            if (length >= gap) {
+                std::copy(data, data + gap, block.data() + offset);
+                updateBlock(block.data());
+
+                offset = 0;
+                data += gap;
+                length -= gap;
+            }
+
+            while (length >= blocksize) {
+                updateBlock(data);
+
+                data += length;
+                length -= blocksize;
+            }
+
+            if (length > 0) {
+                std::copy(data, data + length, block.data() + offset);
+                offset += length;
+            }
+        }
 
         void update(const std::vector<uint8_t>& data) 
         {
             update(data.data(), data.size());
         }
 
-        std::vector<uint8_t> doFinal(const std::vector<uint8_t>& data) 
+        std::vector<uint8_t> doFinal(const std::vector<uint8_t>& data)
         {
             update(data);
-            auto digest = doFinal();
-
-            init();
-            return digest;
+            auto tag = doFinal();
+            // reset();
+            return tag;
         }
     };
 }}
