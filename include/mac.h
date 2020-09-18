@@ -28,6 +28,9 @@
 #include "named_algorithm.h"
 #include <vector>
 
+#include <iostream>
+#include <iomanip>
+
 namespace mockup { namespace crypto { 
 
     class Mac : public NamedAlgorithm {
@@ -81,9 +84,7 @@ namespace mockup { namespace crypto {
         std::vector<uint8_t> doFinal(const std::vector<uint8_t>& data)
         {
             update(data);
-            auto tag = doFinal();
-            // reset();
-            return tag;
+            return doFinal();
         }
     };
 }}

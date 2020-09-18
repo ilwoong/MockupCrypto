@@ -31,8 +31,6 @@
 #include "../hash.h"
 #include "../arx_primitive.h"
 
-#include <iostream>
-
 namespace mockup { namespace crypto { namespace hash {
 
     template <typename WORD_T, size_t NUM_STEPS>
@@ -130,8 +128,10 @@ namespace mockup { namespace crypto { namespace hash {
 
             processLength();
             updateBlock(block.data());
-
-            return toOutput();
+            auto output = toOutput();
+            
+            init();
+            return output;
         }
 
     protected:

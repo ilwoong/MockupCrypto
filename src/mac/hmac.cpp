@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,8 +69,11 @@ void Hmac::updateBlock(const uint8_t* data)
 
 std::vector<uint8_t> Hmac::doFinal()
 {
+    if (offset > 0) {
+        hash->update(block.data(), offset);
+    }
     auto tag = hash->doFinal();
-    
+
     hash->init();
     hash->update(opad);
     tag = hash->doFinal(tag);

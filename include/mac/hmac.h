@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_HMAC_H__
-#define __MOCKUP_CRYPTO_HMAC_H__
+#ifndef __MOCKUP_CRYPTO_MAC_HMAC_H__
+#define __MOCKUP_CRYPTO_MAC_HMAC_H__
 
 #include "../mac.h"
 #include "../hash.h"

@@ -1,7 +1,7 @@
 /**
  * The MIT License
  *
- * Copyright (c) 2019 Ilwoong Jeong (https://github.com/ilwoong)
+ * Copyright (c) 2020 Ilwoong Jeong (https://github.com/ilwoong)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,37 +22,29 @@
  * THE SOFTWARE.
  */
 
-#ifndef __MOCKUP_CRYPTO_HASH_H__
-#define __MOCKUP_CRYPTO_HASH_H__
+#ifndef __MOCKUP_CRYPTO_PBKDF2_H__
+#define __MOCKUP_CRYPTO_PBKDF2_H__
+
+#include <vector>
+#include <memory>
 
 #include "named_algorithm.h"
-#include <vector>
+#include "mac.h"
+#include "hash.h"
 
 namespace mockup { namespace crypto { 
 
-    class Hash : public NamedAlgorithm {
+    class Pbkdf2 : public NamedAlgorithm {
+    private:
+        std::shared_ptr<Mac> hmac;
+
     public:
-        Hash() = default;
-        virtual ~Hash() = default;
+        Pbkdf2(std::shared_ptr<Hash> hash);
+        virtual ~Pbkdf2() = default;
 
-        virtual size_t blocksize() const = 0;
-        virtual size_t outputsize() const = 0;
+        const std::string name() const override;
 
-        virtual void init() = 0;
-        virtual void update(const uint8_t* data, size_t length) = 0;
-        virtual std::vector<uint8_t> doFinal() = 0;
-
-        void update(const std::vector<uint8_t>& data) 
-        {
-            update(data.data(), data.size());
-        }
-
-        std::vector<uint8_t> doFinal(const std::vector<uint8_t>& data) 
-        {
-            update(data);
-            auto digest = doFinal();
-            return digest;
-        }
+        std::vector<uint8_t> derive(const std::vector<uint8_t>& password, const std::vector<uint8_t>& salt, size_t iterations, size_t outsize);
     };
 }}
 
