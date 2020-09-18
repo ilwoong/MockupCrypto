@@ -32,3 +32,9 @@ LSH is a cryptographic hash function developed by NSR.
 
 #### Implementations
 * Template implementation of LSH family
+
+### SHA2
+SHA2 is a cryptographic hash function developed by NSA.
+
+#### Implementations
+* Template implementation of SHA2 family
