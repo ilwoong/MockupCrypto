@@ -23,14 +23,13 @@
  */
 
 #include <algorithm>
-#include <iostream>
-#include <iomanip>
 #include <sstream>
 #include <memory>
 
 #include "../../include/mac/hmac.h"
 #include "../../include/hash/sha2.h"
 #include "../../include/util/hex.h"
+#include "../../include/util/console.h"
 #include "../test_vector_reader.h"
 
 using namespace mockup::crypto;
@@ -69,17 +68,6 @@ static TestVectorReader getTestVector(std::string title)
     return tvr;
 }
 
-static void print(const std::vector<uint8_t>& data)
-{
-    std::cout << std::hex; 
-
-    for (auto hex : data) {
-        std::cout << std::setw(2) << std::setfill('0') << +hex;
-    }
-
-    std::cout << std::endl;
-}
-
 static void print_verify_result(const std::string& title, size_t countPassed, size_t countTotal)
 {
     std::cout << title;
@@ -108,8 +96,8 @@ static void test_hmac_sha2(int sha2size, int outsize)
         if (std::equal(tag.begin(), tag.end(), digest.begin())) {
             countPassed += 1;            
         } else {
-            print(tag);
-            print(digest);
+            console_print("EXP", tag);
+            console_print("BUT", digest);
             std::cout << std::endl;
         }
     }

@@ -25,24 +25,12 @@
 #include "../include/pbkdf2.h"
 #include "../include/mac/hmac.h"
 #include "../include/hash/sha2.h"
-
-#include <iostream>
-#include <iomanip>
+#include "../include/util/console.h"
 
 using namespace mockup::crypto;
 using namespace mockup::crypto::mac;
 using namespace mockup::crypto::hash;
-
-static void print(const std::vector<uint8_t>& data)
-{
-    std::cout << std::hex; 
-
-    for (auto hex : data) {
-        std::cout << std::setw(2) << std::setfill('0') << +hex;
-    }
-
-    std::cout << std::endl;
-}
+using namespace mockup::crypto::util;
 
 static std::vector<uint8_t> i2bs(uint32_t i)
 {
@@ -75,28 +63,28 @@ int main(int argc, const char** argv)
     std::vector<uint8_t> salt = s2bs("salt");
 
     auto derived = pbkdf2->derive(password, salt, 1, 32);
-    print(derived);
+    console_print("OUT", derived);
 
     derived = pbkdf2->derive(password, salt, 2, 32);
-    print(derived);
+    console_print("OUT", derived);
 
     derived = pbkdf2->derive(password, salt, 4096, 32);
-    print(derived);
+    console_print("OUT", derived);
 
     derived = pbkdf2->derive(password, salt, 16777216, 32);
-    print(derived);
+    console_print("OUT", derived);
 
     password = s2bs("passwordPASSWORDpassword");
     salt = s2bs("saltSALTsaltSALTsaltSALTsaltSALTsalt");
 
     derived = pbkdf2->derive(password, salt, 4096, 40);
-    print(derived);
+    console_print("OUT", derived);
 
     password = {'p','a','s','s',0,'w','o','r','d'};
     salt = {'s','a',0,'l','t'};
 
     derived = pbkdf2->derive(password, salt, 4096, 16);
-    print(derived);
+    console_print("OUT", derived);
 
     return 0;
 }
