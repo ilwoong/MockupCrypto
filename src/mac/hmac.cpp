@@ -35,6 +35,11 @@ Hmac::Hmac(std::shared_ptr<Hash> hash) : hash(hash)
     block.assign(blocksize, 0);
 }
 
+const std::string Hmac::name() const 
+{
+    return "HMAC_" + hash->name();
+}
+
 void Hmac::init(const uint8_t* key, size_t keysize)
 {
     offset = 0;
@@ -51,7 +56,7 @@ void Hmac::init(const uint8_t* key, size_t keysize)
     ipad.assign(hash->blocksize(), 0x36);
 
     std::transform(ptr.begin(), ptr.end(), opad.begin(), opad.begin(), std::bit_xor<uint8_t>());
-    std::transform(ptr.begin(), ptr.end(), ipad.begin(), opad.begin(), std::bit_xor<uint8_t>());
+    std::transform(ptr.begin(), ptr.end(), ipad.begin(), ipad.begin(), std::bit_xor<uint8_t>());
 
     hash->init();
     hash->update(ipad);
@@ -64,11 +69,9 @@ void Hmac::updateBlock(const uint8_t* data)
 
 std::vector<uint8_t> Hmac::doFinal()
 {
-    block[offset] = 0x80;
-    std::fill(block.begin() + offset + 1, block.end(), 0x00);
-    hash->update(block);    
     auto tag = hash->doFinal();
     
+    hash->init();
     hash->update(opad);
     tag = hash->doFinal(tag);
 

@@ -42,6 +42,8 @@ namespace mockup { namespace crypto { namespace mac {
         Hmac(std::shared_ptr<Hash> hash);
         virtual ~Hmac() = default;
 
+        const std::string name() const override;
+
         void init(const uint8_t* key, size_t keysize) override;
         void updateBlock(const uint8_t* data) override;
         std::vector<uint8_t> doFinal() override;

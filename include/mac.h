@@ -40,9 +40,13 @@ namespace mockup { namespace crypto {
         Mac() = default;
         virtual ~Mac() = default;
 
-        virtual void init(const uint8_t* key, size_t keysize) = 0;
+        virtual void init(const uint8_t* key, size_t keysize) = 0;        
         virtual void updateBlock(const uint8_t* data) = 0;
         virtual std::vector<uint8_t> doFinal() = 0;
+
+        void init(const std::vector<uint8_t>& key) {
+            init(key.data(), key.size());
+        }
 
         void update(const uint8_t* data, size_t length) {
             auto gap = blocksize - offset;
